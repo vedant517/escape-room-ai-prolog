@@ -6,24 +6,26 @@
 :- use_module(library(http/http_dispatch)).
 :- use_module(library(http/http_parameters)).
 :- use_module(library(http/html_write)).
-:- use_module(library(http/json)).
 
-:- [escape_room].   % load the solver code
+:- use_module(library(json)).  % fixed JSON import
 
-/* ---------- HTTP ROUTES ---------- */
+:- [escape_room].   % Load solver
+
+/* ---------- ROUTES ---------- */
 
 :- http_handler('/', home_page, []).
 :- http_handler('/solve', solve_handler, []).
 
-/* ---------- START SERVER ---------- */
+/* ---------- SERVER START (RENDER FIXED VERSION) ---------- */
 
 start_server :-
     http_server(http_dispatch, [port(4000)]),
-    format("Server running at http://localhost:4000/~n").
+    format("Server started on port 4000~n"),
+    thread_get_message(_).  % <- keeps server running forever (IMPORTANT)
 
 :- initialization(start_server, main).
 
-/* ---------- HOME PAGE (WEB UI) ---------- */
+/* ---------- HOME PAGE ---------- */
 
 home_page(_Request) :-
     reply_html_page(
@@ -31,18 +33,19 @@ home_page(_Request) :-
         [
             h1('AI Escape Room Solver'),
             p('Choose a search algorithm:'),
+
             form([action='/solve', method='GET'], [
                 select([name=algo], [
-                    option([value=dfs],'Depth-First Search (DFS)'),
-                    option([value=bfs],'Breadth-First Search (BFS)'),
-                    option([value=a],'A* Search')
+                    option([value=dfs], 'Depth-First Search (DFS)'),
+                    option([value=bfs], 'Breadth-First Search (BFS)'),
+                    option([value=a],   'A* Search')
                 ]),
                 input([type=submit, value='Solve'])
             ])
         ]
     ).
 
-/* ---------- SOLVER HANDLER (API) ---------- */
+/* ---------- SOLVER HANDLER ---------- */
 
 solve_handler(Request) :-
     http_parameters(Request, [algo(Algo, [])]),
@@ -62,3 +65,4 @@ solve_handler(Request) :-
             p(a([href='/'], 'Back'))
         ]
     ).
+
