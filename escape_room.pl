@@ -26,7 +26,7 @@ key_at(armory, red_key).
 trap(lab).
 trap(secret_tunnel).
 
-portal(hall, vault).   % teleport
+portal(hall, vault).
 
 start_room(entrance).
 goal_room(exit).
@@ -135,3 +135,4 @@ insert_node([N1|Ns], N, [N1|R]) :-
     insert_node(Ns, N, R).
 
 f(node(_,_,G,H), F) :- F is G + H.
+   
